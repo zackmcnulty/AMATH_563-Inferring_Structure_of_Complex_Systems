@@ -1,5 +1,12 @@
 # AMATH 563: Inferring Structure of Complex Systems
 
+## Setting Up CVX
+- Open MATLAB
+- In the MATLAB console/terminal type:
+``` 
+	cd cvx-w64/cvx
+	cvx_setup
+```
 
 
 ## Lecture Topics
