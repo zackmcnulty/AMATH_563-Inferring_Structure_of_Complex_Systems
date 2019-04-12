@@ -46,9 +46,10 @@ for k = 1 : numElements
     next = fread(fid, numRows*numCols, 'uint8');
     if file_type == 'image'
         
-        result(:, k) = uint8(next);
-    %     imshow(reshape(Atest(:,k), numCols, numRows).');
-    %     pause(1)
+        result(:, k) = imcomplement(uint8(next)); % take image complement
+        
+%         imshow(uint8(reshape(result(:,k), numCols, numRows)).');
+%         pause(1)
     else
         next = uint8(next);
         if next == 0
