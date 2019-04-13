@@ -1,4 +1,4 @@
-function result = load_MNIST_file(file, file_type)
+function result = load_MNIST_file(file, file_type, invert)
 
 % https://stackoverflow.com/questions/24127896/reading-mnist-image-database-binary-file-in-matlab
 
@@ -10,6 +10,8 @@ function result = load_MNIST_file(file, file_type)
 % file_type = 'image' or 'label' tells whether these files correspond to
 % images or labels
 % file = path to file from current working directory.
+% invert = 1 if you want to invert the pixel colors (i.e. to be white digit
+% on black background)
 
 %//Open file
 fid = fopen(file, 'r');
@@ -46,8 +48,11 @@ for k = 1 : numElements
     next = fread(fid, numRows*numCols, 'uint8');
     if file_type == 'image'
         
-        result(:, k) = imcomplement(uint8(next)); % take image complement
-        
+        if invert
+            result(:, k) = imcomplement(uint8(next)); % take image complement
+        else
+            result(:, k) = uint8(next);
+        end
 %         imshow(uint8(reshape(result(:,k), numCols, numRows)).');
 %         pause(1)
     else
