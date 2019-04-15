@@ -14,6 +14,14 @@
 ##### Regularization and Promoting Sparsity
 - Solving overdetermined & underdetermined systems
 - L1 Norm vs L2 Norm
+- Gradient descent, LASSO, and QR Decomposition
+- Regularization and the benefits of sparsity
+
+
+##### Model Discovery
+
+- Discovering models for ODEs & PDEs using data
+- Discovering hidden (latent) variables using Time Embeddings
 
 
 
