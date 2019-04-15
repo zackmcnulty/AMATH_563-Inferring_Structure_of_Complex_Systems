@@ -30,5 +30,6 @@
 
 ##### HW1: Regression and Sparsity
 - MNIST database (hand-drawn digits)
+- Digit recognition using linear regression
 - Promoting Sparsity with L1 Norm
-- Matlab optimization with CVX
+- MATLAB optimization with CVX
