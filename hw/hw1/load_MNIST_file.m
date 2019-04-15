@@ -1,4 +1,4 @@
-function result = load_MNIST_file(file, file_type, invert)
+function result = load_MNIST_file(file, file_type, invert, mean_subtract)
 
 % https://stackoverflow.com/questions/24127896/reading-mnist-image-database-binary-file-in-matlab
 
@@ -66,5 +66,10 @@ end
 
 %//Close the file
 fclose(fid);
+
+if mean_subtract && file_type == 'image'
+    result = result - mean(mean(result));
+end
+
 end
 

@@ -1,8 +1,11 @@
-function [predicted_labels, error_rate] = predict_labels(X_train, A_test_images, B_test_labels, method_name)
+function [predicted_labels, error_rate] = predict_labels(X_train, A_test_images, B_test_labels, method_name, num_pixels)
 
 % X_train are the parameters trained using the given model
 % A_test_images are the images in the testing data set and B_test_labels
 % are their corresponding labels.
+% method name is the name of the AX = B solver being used; only effects
+% plot labeling.
+% num_pixels = number of pixels to use in low rank approximation
 
 
 new_labels = A_test_images * X_train;
@@ -57,6 +60,7 @@ colorbar;
 figure(3)
 subplot(121)
 pcolor(flipud(pixel_preferences ~= 0))
+nonzero_pixels = sum(sum(pixel_preferences ~= 0))
 colormap(gray(2))
 title('Nonzero pixel values (in white)')
 xlabel('x coordinate')
@@ -65,21 +69,21 @@ ylabel('y coordinate')
 
 subplot(122)
 pcolor(flipud(X_train ~= 0)), shading interp;
+nonzero_coefficients = sum(sum(X_train ~= 0))
 colormap(gray(2))
 title('Nonzero coefficient values (in white)')
 ylabel('Pixel')
 xlabel('Digit')
 
 
-% Find the most important pixels in this image
+% Part 3: Find the most important pixels in this image
 figure(4)
-num_pixels = 100; % number of pixels to extract.
 
 % sort by value
-% [sorted, I] = sort(reshape(pixel_preferences, [1, 28^2]), 'descend'); 
+ [sorted, I] = sort(abs(reshape(pixel_preferences, [1, 28^2])), 'descend'); 
 
 % sort by distance from mean
-[sorted, I] = sort(abs(reshape(pixel_preferences, [1, 28^2]) - mean(mean(pixel_preferences))), 'descend');
+% [sorted, I] = sort(abs(reshape(pixel_preferences, [1, 28^2]) - mean(mean(pixel_preferences))), 'descend');
 best_pixels = zeros(1, 28^2);
 best_pixels(I(1:num_pixels)) = 1;
 
@@ -87,6 +91,16 @@ pcolor(flipud(reshape(best_pixels, [28,28])));
 colormap(gray(2));
 title("Top 100 most important pixels (in white)")
 
+X_lowrank = X_train .* (best_pixels.'); % zero out all but the most important pixels
 
+new_labels_lowrank = A_test_images * X_lowrank;
+predicted_labels_lowrank = zeros(size(A_test_images,1),10);
+for k = 1:size(predicted_labels, 1)
+   index = find(new_labels_lowrank(k,:) == max(new_labels_lowrank(k,:)),1);
+   predicted_labels_lowrank(k, index) = 1;
+%    predicted_labels(k, :) = predicted_labels(k, :) == max(predicted_labels(k, :));
+end
+
+error_rate_lowrank = sum(sum(predicted_labels_lowrank ~= B_test_labels)) / (2*size(predicted_labels_lowrank, 1))
 end
 
