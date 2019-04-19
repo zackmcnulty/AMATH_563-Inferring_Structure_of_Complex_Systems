@@ -22,12 +22,13 @@
 
 - Discovering models for ODEs & PDEs using data
 - Discovering hidden (latent) variables using Time Embeddings
-
-##### 
 - Pareto Frontiers
 - Cross-validation
 - k fold cross validation
 - Information Criteria (Bayesian,KL, AIC) 
+
+##### Data Assimilation
+- Kalman Filters & Model auto-correction
 
 
 ## Homework Topics
