@@ -29,6 +29,11 @@
 
 ##### Data Assimilation
 - Kalman Filters & Model auto-correction
+- KL Divergence
+- Information Criterion: AIC BIC
+- Time-Embeddings & Discovering Latent Variables
+
+##### Dynamic Mode Decomposition
 
 
 ## Homework Topics
@@ -38,3 +43,8 @@
 - Digit recognition using linear regression
 - Promoting Sparsity with L1 Norm
 - MATLAB optimization with CVX
+
+##### HW2: Model Discovery
+- Nonlinear sparse regression
+- Discovery of dynamical systems through data
+- Model Assessment: Information Criterion and KL Divergence
