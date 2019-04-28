@@ -37,14 +37,14 @@ ydot = [(y_vals(2) - y_vals(1))/dt,   ydot,   (y_vals(end) - y_vals(end-1)) / dt
 % Define Function Library
 % t = time, x = # hares, y = # lynx
 function_vector = @(t,x,y) [ones(length(t), 1) x y x.^2 y.^2 x.*y x.^3 y.^3 x.^2.*y y.^2.*x x.^2.*y.^2 ...
-                                 t.^2 t.^3 sin(t) cos(t) sin(x) sin(y) cos(x) cos(y) sin(x.^2) cos(x.^2) ...
-                                 exp(t) exp(x) exp(y)];
+                                 t t.^2 t.^3 sin(t) cos(t) sin(x) sin(y) cos(x) cos(y) sin(x.^2) cos(x.^2) ...
+                                 exp(t) exp(x) exp(y) ];
 function_library = function_vector(t_vals.', x_vals.', y_vals.');
 
 % LASSO
 % function_library * X = xdot && function_library * Y = ydot
 % 
-lambda = 0.05;
+lambda = 0.045;
 x_coeffs = lasso(function_library, xdot.', 'Lambda', lambda);
 y_coeffs = lasso(function_library, ydot.', 'Lambda', lambda);
 
@@ -75,13 +75,16 @@ data_est = real(data_est);
 figure(3)
 subplot(121)
 plot(t_vals, x_vals, 'r-', tx, data_est(:,1), 'k-')
-title('Hare')
-
+title('Historical Hare Populations')
+xlabel('Years Past 1845')
+ylabel('Population')
 legend({'True', 'Estimated'})
 
 subplot(122)
 plot(t_vals, y_vals, 'r-', tx, data_est(:,2), 'k-')
-title('Lynx')
+title('Historical Lynx Populations')
+xlabel('Years Past 1845')
+ylabel('Population')
 legend({'True', 'Estimated'})
 
 
@@ -127,17 +130,53 @@ KL_y = trapz(fy .* log(fy ./ gy));
 % Retain three of your best three models and compare their AIC and BIC scores.
 
 % Estimate Log likelihood of model
-
+figure(5)
 
 %% Part 4: Time Embeddings
+close all; clc;
 
 % Time-delay embed the system and determine if there are latent variables
+tskip = 1; % number time points to stagger each measurement by
+num_layers = 50; % number of staggered measurements to generate
+layer_length = length(x_vals) - tskip*num_layers;
+H_x = zeros(num_layers, layer_length);
+H_y = zeros(num_layers, layer_length);
+
+for j = 1:num_layers
+    H_x(j, :) = x_vals(1+(j-1)*tskip: 1+(j-1)*tskip + layer_length-1);
+    H_y(j, :) = y_vals(1+(j-1)*tskip: 1+(j-1)*tskip + layer_length-1);
+end
+
+[Ux Sx Vx] = svd(H_x, 'econ');
+[Uy Sy Vy] = svd(H_y, 'econ');
+
+% Plot singular values to look for latent variables
+
+% three dominant singular values: outside variable besides just hare/lynx
+% populations that plays a role? Or just time I guess
+singular_x = diag(Sx) ./ max(diag(Sx));
+singular_y = diag(Sy) ./ max(diag(Sy));
+
+figure(6)
+subplot(121)
+plot(singular_x, 'r.', 'markersize', 10)
+title("Time-Embedded Signular Values - Hare Population")
+xlabel('Index j')
+ylabel('Normalized Singular Value \sigma_j')
+
+subplot(122)
+plot(singular_y, 'r.', 'markersize', 10)
+title("Time-Embedded Signular Values - Lynx Population")
+xlabel('Index j')
+ylabel('Normalized Singular Value \sigma_j')
 
 %% Part 5: Belousov-Zhabotinsky Chemical Oscillator
-% See what you can do with the data (i.e. repeat the first two steps above
+% See what you can do with the data (i.e. repeat the first two steps above)
 clear all; close all; clc;
 
 load('input_files/BZ.mat')
+
+% This is a PDE system? Create 3D function library?
 
 % [m,n,k]=size(BZ_tensor); % x vs y vs time data
 % for j=1:k 
