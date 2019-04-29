@@ -38,7 +38,9 @@ ydot = [(y_vals(2) - y_vals(1))/dt,   ydot,   (y_vals(end) - y_vals(end-1)) / dt
 % t = time, x = # hares, y = # lynx
 function_vector = @(t,x,y) [ones(length(t), 1) x y x.^2 y.^2 x.*y x.^3 y.^3 x.^2.*y y.^2.*x x.^2.*y.^2 ...
                                  t t.^2 t.^3 sin(t) cos(t) sin(x) sin(y) cos(x) cos(y) sin(x.^2) cos(x.^2) ...
-                                 exp(t) exp(x) exp(y) ];
+                                 exp(t) exp(x) exp(y) ...
+                                 t.^4, t.^5, t.^6 x.*0.5 exp(t).*sin(t) y*0.5 ...
+                                 x.*y.*t];
 function_library = function_vector(t_vals.', x_vals.', y_vals.');
 
 % LASSO
@@ -90,47 +92,101 @@ legend({'True', 'Estimated'})
 
 
 %% Part 2: KL Divergence
-% Compute the KL divergence of the best model to the data.
-bin_size = 2;
-data_range_x = min([x_vals data_est(:,1).']): bin_size : max([x_vals data_est(:,1).']);
-data_range_y = min([y_vals data_est(:,2).']): bin_size : max([y_vals data_est(:,2).']);
 
-% generate PDFs (constant offset added to avoid division by zero)
+
+% % Compute the KL divergence of the best model to the data.
+% bin_size = 2;
+% data_range_x = min([x_vals data_est(:,1).']): bin_size : max([x_vals data_est(:,1).']);
+% data_range_y = min([y_vals data_est(:,2).']): bin_size : max([y_vals data_est(:,2).']);
+% 
+% % generate PDFs (constant offset added to avoid division by zero)
+% offset = 0.01;
+% fx = hist(x_vals, data_range_x) + offset;
+% fy = hist(y_vals, data_range_y) + offset;
+% gx = hist(data_est(:,1) , data_range_x) + offset;
+% gy = hist(data_est(:,2) , data_range_y) + offset;
+% 
+% % normalize data
+% 
+% fx = fx / trapz(data_range_x, fx);
+% fy = fy / trapz(data_range_y, fy);
+% gx = gx / trapz(data_range_x, gx);
+% gy = gy / trapz(data_range_y, gy);
+% 
+% % Plot distributions
+% figure(4)
+% subplot(121)
+% plot(data_range_x, fx, 'r-', data_range_x, gx, 'b-');
+% xlim([data_range_x(1), data_range_x(end) ])
+% legend({'Data', 'Model'})
+% 
+% subplot(122)
+% plot(data_range_y, fy, 'r-', data_range_y, gy, 'b-');
+% legend({'Data', 'Model'})
+% 
+% 
+% % Calculate KL Divergence
+% 
+% KL_x = trapz(fx .*log(fx ./ gx));
+% KL_y = trapz(fy .* log(fy ./ gy));
+
+clc; close all;
+
+num_bins = [15, 15];
+
+data_range_x = linspace(min([x_vals data_est(:,1).']), max([x_vals data_est(:,1).']), num_bins(1) + 1);
+data_range_y = linspace(min([y_vals data_est(:,2).']), max([y_vals data_est(:,2).']), num_bins(1) + 1);
+EDGES = {};
+EDGES{1} = data_range_x;
+EDGES{2} = data_range_y;
+
 offset = 0.01;
-fx = hist(x_vals, data_range_x) + offset;
-fy = hist(y_vals, data_range_y) + offset;
-gx = hist(data_est(:,1) , data_range_x) + offset;
-gy = hist(data_est(:,2) , data_range_y) + offset;
+true_f = hist3([x_vals.', y_vals.'], 'Edges', EDGES) + offset;
+modeled_f = hist3(data_est, 'Edges', EDGES) + offset; %0.01 added to avoid division by zero
 
 % normalize data
+true_f = true_f ./ trapz(trapz(true_f));
+modeled_f = modeled_f ./ trapz(trapz(modeled_f));
 
-fx = fx / trapz(data_range_x, fx);
-fy = fy / trapz(data_range_y, fy);
-gx = gx / trapz(data_range_x, gx);
-gy = gy / trapz(data_range_y, gy);
+[X,Y] = meshgrid(data_range_x, data_range_y);
 
-% Plot distributions
 figure(4)
 subplot(121)
-plot(data_range_x, fx, 'r-', data_range_x, gx, 'b-');
-xlim([data_range_x(1), data_range_x(end) ])
-legend({'Data', 'Model'})
+surf(X, Y, true_f);
+title('True model (data) probability distribution')
+xlim([data_range_x(1), data_range_x(end)])
+ylim([data_range_y(1), data_range_y(end)])
 
 subplot(122)
-plot(data_range_y, fy, 'r-', data_range_y, gy, 'b-');
-legend({'Data', 'Model'})
+surf(X,Y, modeled_f);
+title('Generated model probability distribution')
+xlim([data_range_x(1), data_range_x(end)])
+ylim([data_range_y(1), data_range_y(end)])
 
-
-% Calculate KL Divergence
-
-KL_x = trapz(fx .*log(fx ./ gx));
-KL_y = trapz(fy .* log(fy ./ gy));
+KL_divergence = trapz(trapz((true_f .* log(true_f ./ modeled_f))));
 
 %% Part 3: Information Criterion
 % Retain three of your best three models and compare their AIC and BIC scores.
 
 % Estimate Log likelihood of model
 figure(5)
+
+data = [x_vals.', y_vals.'];
+
+n = length(x_vals);
+
+RSS = 0;
+for j = 1:length(data)
+    RSS = RSS + norm(data(j, :) - data_est(j, :));
+end
+
+K = 2;
+variance = RSS / n;
+logL = -n/2*log(2*pi) - n/2*log(variance) - 1/(2*variance) * RSS;
+
+AIC = 2*K -2*logL;
+BIC = log(n) * K - 2*logL;
+
 
 %% Part 4: Time Embeddings
 close all; clc;
@@ -147,8 +203,8 @@ for j = 1:num_layers
     H_y(j, :) = y_vals(1+(j-1)*tskip: 1+(j-1)*tskip + layer_length-1);
 end
 
-[Ux Sx Vx] = svd(H_x, 'econ');
-[Uy Sy Vy] = svd(H_y, 'econ');
+[Ux, Sx, Vx] = svd(H_x, 'econ');
+[Uy, Sy, Vy] = svd(H_y, 'econ');
 
 % Plot singular values to look for latent variables
 
@@ -177,6 +233,7 @@ clear all; close all; clc;
 load('input_files/BZ.mat')
 
 % downsample to make working with system more computationally managable.
+% take a single row of pixels?
 BZ_tensor = BZ_tensor(100:250, 150:300, :);
 
 % This is a PDE system? Create 3D function library?
