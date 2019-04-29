@@ -162,7 +162,7 @@ subplot(121)
 plot(singular_x, 'r.', 'markersize', 10)
 title("Time-Embedded Signular Values - Hare Population")
 xlabel('Index j')
-ylabel('Normali9 zed Singular Value \sigma_j')
+ylabel('Normalized Singular Value \sigma_j')
 
 subplot(122)
 plot(singular_y, 'r.', 'markersize', 10)
@@ -187,5 +187,6 @@ for j=1:k
     pcolor(A), shading interp, pause(0.2) 
 end
 
-% u(t, x, y)
-% We want d/dt u = u_t
+%u (x,t)
+
+% v(y,t)
