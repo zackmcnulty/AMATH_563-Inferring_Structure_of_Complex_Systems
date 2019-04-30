@@ -11,6 +11,7 @@
 % Find the best nonlinear, dynamical systems model to the data using 
 % sparse regression.
 clear all; close all; clc;
+
 data = load('input_files/pop_data');
 pop_data = data.pop_data;
 
@@ -24,23 +25,27 @@ y_vals = interp1(pop_data(:,1), pop_data(:,3), query_points);
 
 figure(1)
 plot(t_vals, x_vals, t_vals, y_vals)
+title('Historical Hare and Lynx Populations')
+xlabel('Time (years past 1845)')
+ylabel('Population')
+legend({'Hare', 'Lynx'})
+set(gca, 'fontsize', 15)
 
 
 % Compute numerical derivatives of data
 
 xdot = (x_vals(3:end) - x_vals(1:end-2)) ./ (2*dt);
-xdot = [(x_vals(2) - x_vals(1))/dt,    xdot,    (x_vals(end) - x_vals(end-1)) / dt];
 ydot = (y_vals(3:end) - y_vals(1:end-2)) ./ (2*dt);
-ydot = [(y_vals(2) - y_vals(1))/dt,   ydot,   (y_vals(end) - y_vals(end-1)) / dt];
-
+x_vals = x_vals(2:end-1);
+y_vals = y_vals(2:end-1);
+t_vals = t_vals(2:end-1);
 
 % Define Function Library
 % t = time, x = # hares, y = # lynx
 function_vector = @(t,x,y) [ones(length(t), 1) x y x.^2 y.^2 x.*y x.^3 y.^3 x.^2.*y y.^2.*x x.^2.*y.^2 ...
                                  t t.^2 t.^3 sin(t) cos(t) sin(x) sin(y) cos(x) cos(y) sin(x.^2) cos(x.^2) ...
                                  exp(t) exp(x) exp(y) ...
-                                 t.^4, t.^5, t.^6 x.*0.5 exp(t).*sin(t) y*0.5 ...
-                                 x.*y.*t];
+                                 t.^4, t.^5, t.^6 x.*0.5 exp(t).*sin(t) y*0.5];
 function_library = function_vector(t_vals.', x_vals.', y_vals.');
 
 % LASSO
@@ -76,18 +81,29 @@ data_est = real(data_est);
 
 figure(3)
 subplot(121)
-plot(t_vals, x_vals, 'r-', tx, data_est(:,1), 'k-')
+plot(t_vals, x_vals, 'r-', tx, data_est(:,1), 'k--', 'linewidth', 2)
 title('Historical Hare Populations')
 xlabel('Years Past 1845')
 ylabel('Population')
-legend({'True', 'Estimated'})
+legend({'True Hare', 'Estimated Hare'})
+set(gca, 'fontsize', 15)
 
 subplot(122)
-plot(t_vals, y_vals, 'r-', tx, data_est(:,2), 'k-')
+plot(t_vals, y_vals, 'b-', tx, data_est(:,2), 'k--', 'linewidth', 2)
 title('Historical Lynx Populations')
 xlabel('Years Past 1845')
 ylabel('Population')
 legend({'True', 'Estimated'})
+set(gca, 'fontsize', 15)
+
+
+%%
+
+threshold = 0.01;
+Ix = find(x_coeffs > threshold);
+x_coeffs(Ix)
+Iy = find(y_coeffs > threshold);
+y_coeffs(Iy)
 
 
 
@@ -155,21 +171,28 @@ subplot(121)
 surf(X, Y, true_f);
 title('True model (data) probability distribution')
 xlim([data_range_x(1), data_range_x(end)])
+xlabel('Hare Population')
+ylabel('Lynx Population')
+zlabel('Probability')
 ylim([data_range_y(1), data_range_y(end)])
+
 
 subplot(122)
 surf(X,Y, modeled_f);
 title('Generated model probability distribution')
 xlim([data_range_x(1), data_range_x(end)])
 ylim([data_range_y(1), data_range_y(end)])
+xlabel('Hare Population')
+ylabel('Lynx Population')
+zlabel('Probability')
 
 KL_divergence = trapz(trapz((true_f .* log(true_f ./ modeled_f))));
+
 
 %% Part 3: Information Criterion
 % Retain three of your best three models and compare their AIC and BIC scores.
 
 % Estimate Log likelihood of model
-figure(5)
 
 data = [x_vals.', y_vals.'];
 
@@ -180,7 +203,7 @@ for j = 1:length(data)
     RSS = RSS + norm(data(j, :) - data_est(j, :));
 end
 
-K = 2;
+K = sum(x_coeffs ~= 0) + sum(y_coeffs ~= 0);
 variance = RSS / n;
 logL = -n/2*log(2*pi) - n/2*log(variance) - 1/(2*variance) * RSS;
 
@@ -215,13 +238,13 @@ singular_y = diag(Sy) ./ max(diag(Sy));
 
 figure(6)
 subplot(121)
-plot(singular_x, 'r.', 'markersize', 10)
+plot(singular_x, 'r.', 'markersize', 15)
 title("Time-Embedded Signular Values - Hare Population")
 xlabel('Index j')
-ylabel('Normali9 zed Singular Value \sigma_j')
+ylabel('Normalized Singular Value \sigma_j')
 
 subplot(122)
-plot(singular_y, 'r.', 'markersize', 10)
+plot(singular_y, 'r.', 'markersize', 15)
 title("Time-Embedded Signular Values - Lynx Population")
 xlabel('Index j')
 ylabel('Normalized Singular Value \sigma_j')
@@ -236,13 +259,68 @@ load('input_files/BZ.mat')
 % take a single row of pixels?
 BZ_tensor = BZ_tensor(100:250, 150:300, :);
 
-% This is a PDE system? Create 3D function library?
-
-[m,n,k]=size(BZ_tensor); % x vs y vs time data
-for j=1:k 
-    A=BZ_tensor(:,:,j); 
-    pcolor(A), shading interp, pause(0.2) 
-end
+% % This is a PDE system? Create 3D function library?
+% 
+% [m,n,k]=size(BZ_tensor); % x vs y vs time data
+% for j=1:k 
+%     A=BZ_tensor(:,:,j); 
+%     pcolor(A), shading interp, pause(100) 
+% end
 
 % u(t, x, y)
-% We want d/dt u = u_t
+% We want d/dt u = u_t --> calculate u_t one row at a time for each fixed y
+ % time derivatives for each point (x,y) in the system with the fixed y
+ 
+ % construct derivative matrices
+ 
+dx = 1;
+D=zeros(m,m); D2=zeros(m,m);
+for j=1:m-1
+  D(j,j+1)=1;
+  D(j+1,j)=-1;
+%
+  D2(j,j+1)=1;
+  D2(j+1,j)=1;
+  D2(j,j)=-2;
+end
+D(m,1)=1;
+D(1,m)=-1;
+D=(1/(2*dx))*D;
+%
+D2(m,m)=-2;
+D2(m,1)=1;
+D2(1,m)=1;
+D2=D2/(dx^2);
+ 
+ 
+dt = 1; %?
+LAMBDA = 0.002;
+
+for y = [1,2]
+   Xdot = zeros(m, k-2);
+   X = BZ_tensor(:, y, :); % convert into a function of u(x,t)
+   for jj = 1:m
+       for j = 2:k-1
+            Xdot(jj, j-1) = (X(jj, j+1) - X(jj, j-1)) / (2*dt);
+       end
+   end
+   
+    u=reshape( X(:,2:end-1).',(k-2)*m ,1 );
+
+    for jj=2:k-1
+       ux(jj-1,:)=((D*X(:,jj)).');  % u_x
+       uxx(jj-1,:)=((D2*X(:,jj)).');  % u_xx
+       u2x(jj-1,:)=((D* (X(:,jj).^2) ).');  % (u^2)_x
+    end
+
+    Ux=reshape(ux,(k-2)*m,1);
+    Uxx=reshape(uxx,(k-2)*m,1);
+    U2x=reshape(u2x,(k-2)*m,1);
+    
+    A=[u u.^2 u.^3 Ux Uxx U2x Ux.*u Ux.*Ux Ux.*Uxx];
+
+    Udot=reshape((Xdot.'),(k-2)*m,1);
+
+    xi=lasso(A,Udot,'Lambda',LAMBDA);
+end
+function_vector = [];
