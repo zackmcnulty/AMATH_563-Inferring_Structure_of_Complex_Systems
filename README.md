@@ -20,8 +20,8 @@
 
 ##### Model Discovery
 
-- Discovering models for ODEs & PDEs using data
-- Discovering hidden (latent) variables using Time Embeddings
+- SINDy: Discovering models for ODEs & PDEs using data
+- Time-Embeddings: Discovering hidden (latent) variables
 - Pareto Frontiers
 - Cross-validation
 - k fold cross validation
@@ -29,11 +29,18 @@
 
 ##### Data Assimilation
 - Kalman Filters & Model auto-correction
-- KL Divergence
-- Information Criterion: AIC BIC
-- Time-Embeddings & Discovering Latent Variables
+
 
 ##### Dynamic Mode Decomposition
+- 
+
+##### Clustering and Classification
+- Unsupervised Methods
+    - K-Means
+    - Hierarchical Clustering
+- Supervised Methods
+    - Support Vector Machines
+    - Classification/Decision Trees
 
 
 ## Homework Topics
@@ -48,3 +55,6 @@
 - Nonlinear sparse regression
 - Discovery of dynamical systems through data
 - Model Assessment: Information Criterion and KL Divergence
+
+##### HW3: Clustering and Classification with Neural Networks
+
