@@ -2,10 +2,13 @@ clear all; close all; clc
 
 % Kuramoto-Sivashinsky equation (from Trefethen)
 % u_t = -u*u_x - u_xx - u_xxxx,  periodic BCs 
+for j=1:5
 
-N = 2^7;
+N = 2^8;
 x = 32*pi*(1:N)'/N;
-u = cos(x/16).*(1+sin(x/16)); 
+coeffs = 10*rand(3,1);
+u = coeffs(1)*cos(x/coeffs(2)).*(1+sin(x/coeffs(3))); % training data
+%u = sin(x) + cos(x); % testing data
 v = fft(u);
 
 % % % % % %
@@ -23,8 +26,9 @@ f2 = h*real(mean( (2+LR+exp(LR).*(-2+LR))./LR.^3 ,2));
 f3 = h*real(mean( (-4-3*LR-LR.^2+exp(LR).*(4-LR))./LR.^3 ,2));
 
 % Main time-stepping loop:
-uu = u; tt = 0;
-tmax = 100; nmax = round(tmax/h); nplt = floor((tmax/250)/h); g = -0.5i*k;
+uu = u; % set the initial condition?
+tt = 0;
+tmax = 200; nmax = round(tmax/h); nplt = floor((tmax/250)/h); g = -0.5i*k;
 for n = 1:nmax
 t = n*h;
 Nv = g.*fft(real(ifft(v)).^2);
@@ -39,12 +43,17 @@ v = E.*v + Nv.*f1 + 2*(Na+Nb).*f2 + Nc.*f3; if mod(n,nplt)==0
 uu = [uu,u]; tt = [tt,t]; end
 end
 % Plot results:
+figure(j)
 surf(tt,x,uu), shading interp, colormap(hot), axis tight 
+xlabel('time')
+ylabel('position')
+zlabel('wave height')
 % view([-90 90]), colormap(autumn); 
 set(gca,'zlim',[-5 50]) 
 
-save('kuramoto_sivishinky.mat','x','tt','uu')
+save(strcat('../../data/kuramoto_sivishinky_test', num2str(j), '.mat'),'x','tt','uu')
 
+end
 %%
 figure(2), pcolor(x,tt,uu.'),shading interp, colormap(hot),axis off
 
