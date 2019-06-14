@@ -1,5 +1,6 @@
 # AMATH 563 Final Project
 
+Future state prediction is a fundamental challenge within applied mathematics. Success in sequential prediction tasks such as those found in natural language processing has relied heavily on the use of neural networks. Recent studies suggest this success is due to the emergence of low-dimensional representations of the latent space underlying the task at hand. This latent space provides an optimal coordinate system which best explains how the sequence evolves over time. While this latent space may be predictable in some tasks, it is reasonable to believe some kind of grammar forms the latent space of an NLP task, it is much more ambiguous in others. This paper aims to provide a framework for studying the latent space of natural scenes and movies learned in recurrent neural networks under a predictive setting.\\
 
 
 ## File Descriptions and Uses
@@ -28,11 +29,11 @@ generate_uniform.sh scripts to make a batch of movie files simultaneously.
 usage: python3 make_movie.py
 
 optional flags:
--name : name to give to the movie file
---folder : where to save the movie file
---theta : generate a movie with the given angle of oscillation
--random : generate a movie with a random angle of oscillation
--p_test : percent of angles to make the test dataset
+-name : name to give to the movie file  
+--folder : where to save the movie file  
+--theta : generate a movie with the given angle of oscillation  
+-random : generate a movie with a random angle of oscillation  
+-p_test : percent of angles to make the test dataset  
 
 
 
@@ -44,11 +45,11 @@ and a testing dataset using the movie files labeled "test"
 usage:  python3 convolutional_autoencoder.py
 
 optional flags
---epochs : number of epochs to train for
---batch_size : batch size to train with using stochastic gradient descent
---name : name to give to the keras model generated after training
---load : name of a previous keras model to load; train on top of the current model rather than starting fresh
---l1 : L1 penalty to add to weights in network
+--epochs : number of epochs to train for  
+--batch_size : batch size to train with using stochastic gradient descent  
+--name : name to give to the keras model generated after training  
+--load : name of a previous keras model to load; train on top of the current model rather than starting fresh  
+--l1 : L1 penalty to add to weights in network  
 
 #### rnn_predictor.py
 
@@ -57,13 +58,13 @@ Trains the RNN on the given set of movies in the movie_files/ folder using a pre
 usage: python3 rnn_predictor.py 
 
 optional flags
---epochs : number of epochs to train for
---batch_size : batch size to train with using stochastic gradient descent
---name : name to give to the keras model generated after training
---load : name of a previous RNN (keras model)  to load; train on top of the current model rather than starting fresh
---autoencoder : name of an autoencoder (keras model) to add the RNN to.
---l1 : L1 penalty to add to weights in network
---dt : number of frames ahead you want the RNN to predict
+--epochs : number of epochs to train for  
+--batch_size : batch size to train with using stochastic gradient descent  
+--name : name to give to the keras model generated after training  
+--load : name of a previous RNN (keras model)  to load; train on top of the current model rather than starting fresh  
+--autoencoder : name of an autoencoder (keras model) to add the RNN to.  
+--l1 : L1 penalty to add to weights in network  
+--dt : number of frames ahead you want the RNN to predict  
 
 #### movie_files
 
@@ -96,7 +97,7 @@ and testing it on a provided set of test movie files.
 usage: python3 analysis.py -load /path/to/RNN_keras_model -movie_folder /path/to/folder_of_movies_for_analysis
 
 optional flags:
---svm : run svm on encoder and RNN neural representations
---svd : run SVD on encoder/RNN neural representations
---uniform : plot tuning curves of neural representations with respect to angle of oscillation
+--svm : run svm on encoder and RNN neural representations  
+--svd : run SVD on encoder/RNN neural representations  
+--uniform : plot tuning curves of neural representations with respect to angle of oscillation  
 
