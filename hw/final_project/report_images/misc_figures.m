@@ -1,17 +1,3 @@
-% Plot the test/training dataset ranges for clarity
-x = linspace(0,1,100);
-
-figure(1)
-plot(0.5*ones(1,100), linspace(0,1,100), 'k-')
-hold on;
-plot(linspace(0,1,100), 0.5*ones(1,100), 'k-')
-plot(x, 1/2*x + 0.25, 'r--');
-plot(x, -1/2*x + 0.75, 'r--');
-xlim([0,1]);
-ylim([0,1]);
-xticks([]);
-yticks([]);
-
-figure(2)
-
-area(
+version https://git-lfs.github.com/spec/v1
+oid sha256:a20b9d12de2951b5b5718b808ce7b2cd1b2e507827c83583101ec2867c22205b
+size 333
